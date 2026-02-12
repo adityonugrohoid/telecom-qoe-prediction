@@ -41,9 +41,9 @@ Domain physics: MOS computed using an ITU-T inspired formula with app-specific a
 
 ## Key Findings
 
-- **RMSE:** ~0.35 on held-out test set
-- **Top predictors:** Throughput and latency dominate feature importance across all app types
-- Gaming sessions are most sensitive to latency -- a 20ms increase can drop MOS by 0.5 points
+- **RMSE:** 0.04, **R²:** 0.99 on held-out test set (MOS scale 1-5)
+- **Top predictors:** `service_degradation`, `throughput_mbps`, and `latency_ms` dominate SHAP importance
+- Gaming sessions show highest RMSE (0.058) due to latency sensitivity; browsing is most predictable (RMSE 0.028)
 - Device class acts as a ceiling effect: low-end devices cap MOS regardless of network quality
 
 ## Quick Start
