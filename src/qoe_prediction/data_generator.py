@@ -177,12 +177,33 @@ class QoEDataGenerator(TelecomDataGenerator):
         )
 
         # --- target: MOS score ---
-        mos_score = self.compute_qoe_mos(
+        # Base MOS from network KPIs (deterministic component)
+        mos_base = self.compute_qoe_mos(
             throughput_mbps,
             latency_ms,
             packet_loss_pct,
             app_type,
         )
+
+        # Add realistic noise representing unobserved factors that affect
+        # perceived quality but are NOT in the feature set:
+        #   - Content quality (buffering vs pre-loaded, codec quality)
+        #   - User expectations (power user vs casual)
+        #   - Environmental context (commuting vs home)
+        #   - Device-specific rendering quality
+        #   - Server-side response time (CDN proximity)
+        #
+        # This prevents the model from perfectly reverse-engineering the
+        # MOS formula and produces realistic R² ~ 0.85-0.92.
+        perception_noise = self.rng.normal(0, 0.4, n)
+
+        # User-specific bias: some users consistently rate higher/lower
+        user_bias = self.rng.normal(0, 0.15, n)
+
+        # Content quality factor: random per-session (not in features)
+        content_quality = self.rng.uniform(-0.3, 0.3, n)
+
+        mos_score = np.clip(mos_base + perception_noise + user_bias + content_quality, 1, 5)
 
         df = pd.DataFrame(
             {

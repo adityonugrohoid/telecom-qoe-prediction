@@ -41,10 +41,10 @@ Domain physics: MOS computed using an ITU-T inspired formula with app-specific a
 
 ## Key Findings
 
-- **RMSE:** 0.04, **R²:** 0.99 on held-out test set (MOS scale 1-5)
+- **RMSE:** 0.45, **R²:** 0.58 on held-out test set (MOS scale 1-5)
 - **Top predictors:** `service_degradation`, `throughput_mbps`, and `latency_ms` dominate SHAP importance
-- Gaming sessions show highest RMSE (0.058) due to latency sensitivity; browsing is most predictable (RMSE 0.028)
-- Device class acts as a ceiling effect: low-end devices cap MOS regardless of network quality
+- Gaming sessions show highest RMSE (0.47) due to latency sensitivity; browsing and VoIP are most predictable
+- Unobserved factors (user expectations, content quality, environmental context) limit R² -- realistic for QoE prediction where subjective perception adds irreducible noise
 
 ## Quick Start
 
