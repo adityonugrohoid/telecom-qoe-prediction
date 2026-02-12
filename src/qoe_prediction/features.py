@@ -28,7 +28,9 @@ class FeatureEngineer:
         """
         self.config = config or FEATURE_CONFIG
 
-    def create_temporal_features(self, df: pd.DataFrame, timestamp_col: str = "timestamp") -> pd.DataFrame:
+    def create_temporal_features(
+        self, df: pd.DataFrame, timestamp_col: str = "timestamp"
+    ) -> pd.DataFrame:
         """
         Create time-based features from timestamp.
 
@@ -47,18 +49,13 @@ class FeatureEngineer:
         df["day_of_week"] = df[timestamp_col].dt.dayofweek
         df["is_weekend"] = (df["day_of_week"] >= 5).astype(int)
         df["is_peak_hour"] = (
-            ((df["hour"] >= 9) & (df["hour"] <= 11)) |
-            ((df["hour"] >= 18) & (df["hour"] <= 21))
+            ((df["hour"] >= 9) & (df["hour"] <= 11)) | ((df["hour"] >= 18) & (df["hour"] <= 21))
         ).astype(int)
 
         return df
 
     def create_rolling_aggregates(
-        self,
-        df: pd.DataFrame,
-        group_col: str,
-        value_cols: List[str],
-        windows: List[int] = [7, 30]
+        self, df: pd.DataFrame, group_col: str, value_cols: List[str], windows: List[int] = [7, 30]
     ) -> pd.DataFrame:
         """
         Create rolling window aggregations.
@@ -111,27 +108,24 @@ class FeatureEngineer:
 
         # Network quality index: composite of signal quality and throughput
         if "sinr_db" in df.columns and "throughput_mbps" in df.columns:
-            df["network_quality_index"] = (
-                0.5 * (df["sinr_db"] / 25) +
-                0.5 * (df["throughput_mbps"] / 100)
+            df["network_quality_index"] = 0.5 * (df["sinr_db"] / 25) + 0.5 * (
+                df["throughput_mbps"] / 100
             )
 
         # Service degradation: penalizes high latency and packet loss
         if "latency_ms" in df.columns and "packet_loss_pct" in df.columns:
-            df["service_degradation"] = (
-                df["latency_ms"] / 100 +
-                df["packet_loss_pct"] * 2
-            )
+            df["service_degradation"] = df["latency_ms"] / 100 + df["packet_loss_pct"] * 2
 
         # Throughput per user (proxy for per-session throughput)
         if "throughput_mbps" in df.columns:
             df["throughput_per_user_mbps"] = df["throughput_mbps"]
 
         # Bandwidth utilization: how much of theoretical capacity is consumed
-        if all(c in df.columns for c in ["data_volume_mb", "throughput_mbps", "session_duration_min"]):
-            df["bandwidth_utilization"] = (
-                df["data_volume_mb"] /
-                (df["throughput_mbps"] * df["session_duration_min"] * 60 / 8 + 0.01)
+        if all(
+            c in df.columns for c in ["data_volume_mb", "throughput_mbps", "session_duration_min"]
+        ):
+            df["bandwidth_utilization"] = df["data_volume_mb"] / (
+                df["throughput_mbps"] * df["session_duration_min"] * 60 / 8 + 0.01
             )
 
         # Application sensitivity score: map app types to latency sensitivity
@@ -148,10 +142,7 @@ class FeatureEngineer:
         return df
 
     def encode_categorical(
-        self,
-        df: pd.DataFrame,
-        categorical_cols: List[str] = None,
-        method: str = "onehot"
+        self, df: pd.DataFrame, categorical_cols: List[str] = None, method: str = "onehot"
     ) -> Tuple[pd.DataFrame, dict]:
         """
         Encode categorical features.
@@ -187,11 +178,7 @@ class FeatureEngineer:
 
         return df, encoding_map
 
-    def handle_missing_values(
-        self,
-        df: pd.DataFrame,
-        strategy: str = "mean"
-    ) -> pd.DataFrame:
+    def handle_missing_values(self, df: pd.DataFrame, strategy: str = "mean") -> pd.DataFrame:
         """
         Handle missing values.
 
@@ -220,7 +207,7 @@ class FeatureEngineer:
         df: pd.DataFrame,
         create_temporal: bool = True,
         create_interactions: bool = True,
-        encode_cats: bool = True
+        encode_cats: bool = True,
     ) -> pd.DataFrame:
         """
         Run the complete feature engineering pipeline.

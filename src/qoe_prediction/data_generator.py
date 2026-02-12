@@ -22,11 +22,15 @@ class TelecomDataGenerator:
     def generate(self) -> pd.DataFrame:
         raise NotImplementedError("Subclasses must implement generate()")
 
-    def generate_sinr(self, n: int, base_sinr_db: float = 10.0, noise_std: float = 5.0) -> np.ndarray:
+    def generate_sinr(
+        self, n: int, base_sinr_db: float = 10.0, noise_std: float = 5.0
+    ) -> np.ndarray:
         sinr = self.rng.normal(base_sinr_db, noise_std, n)
         return np.clip(sinr, -5, 25)
 
-    def sinr_to_throughput(self, sinr_db: np.ndarray, network_type: np.ndarray, noise_factor: float = 0.2) -> np.ndarray:
+    def sinr_to_throughput(
+        self, sinr_db: np.ndarray, network_type: np.ndarray, noise_factor: float = 0.2
+    ) -> np.ndarray:
         sinr_linear = 10 ** (sinr_db / 10)
         capacity_factor = np.log2(1 + sinr_linear)
         max_throughput = np.where(network_type == "5G", 300, 50)
@@ -48,13 +52,21 @@ class TelecomDataGenerator:
         congestion = congestion + noise
         return np.clip(congestion, 0, 1)
 
-    def congestion_to_latency(self, congestion: np.ndarray, base_latency_ms: float = 20) -> np.ndarray:
-        latency = base_latency_ms * (1 + 5 * congestion ** 2)
+    def congestion_to_latency(
+        self, congestion: np.ndarray, base_latency_ms: float = 20
+    ) -> np.ndarray:
+        latency = base_latency_ms * (1 + 5 * congestion**2)
         jitter = self.rng.normal(0, 5, len(latency))
         latency = latency + jitter
         return np.clip(latency, 10, 300)
 
-    def compute_qoe_mos(self, throughput_mbps: np.ndarray, latency_ms: np.ndarray, packet_loss_pct: np.ndarray, app_type: np.ndarray) -> np.ndarray:
+    def compute_qoe_mos(
+        self,
+        throughput_mbps: np.ndarray,
+        latency_ms: np.ndarray,
+        packet_loss_pct: np.ndarray,
+        app_type: np.ndarray,
+    ) -> np.ndarray:
         mos_throughput = 1 + 4 * (1 - np.exp(-throughput_mbps / 10))
         latency_penalty = np.clip(latency_ms / 100, 0, 2)
         loss_penalty = packet_loss_pct / 2
@@ -87,7 +99,11 @@ class QoEDataGenerator(TelecomDataGenerator):
     ):
         super().__init__(seed=seed, n_samples=n_samples)
         self.app_types = app_types or [
-            "video_streaming", "browsing", "gaming", "social", "voip",
+            "video_streaming",
+            "browsing",
+            "gaming",
+            "social",
+            "voip",
         ]
         self.app_weights = app_weights or [0.25, 0.30, 0.15, 0.15, 0.15]
         self.device_classes = device_classes or ["low", "mid", "high"]
@@ -113,15 +129,21 @@ class QoEDataGenerator(TelecomDataGenerator):
         # --- timestamps: random instants over 30 days ---
         start = pd.Timestamp("2024-01-01")
         random_seconds = self.rng.integers(0, 30 * 24 * 3600, size=n)
-        timestamps = pd.DatetimeIndex([start + pd.Timedelta(seconds=int(s)) for s in random_seconds])
+        timestamps = pd.DatetimeIndex(
+            [start + pd.Timedelta(seconds=int(s)) for s in random_seconds]
+        )
 
         # --- categorical features ---
         network_type = self.rng.choice(["4G", "5G"], size=n, p=[0.6, 0.4])
         device_class = self.rng.choice(
-            self.device_classes, size=n, p=self.device_weights,
+            self.device_classes,
+            size=n,
+            p=self.device_weights,
         )
         app_type = self.rng.choice(
-            self.app_types, size=n, p=self.app_weights,
+            self.app_types,
+            size=n,
+            p=self.app_weights,
         )
 
         # --- SINR (base varies by device quality) ---
@@ -151,15 +173,15 @@ class QoEDataGenerator(TelecomDataGenerator):
         # --- data volume ---
         # throughput (Mbps) * duration (min) * 60 / 8 -> MB, plus noise
         data_volume_mb = (
-            throughput_mbps
-            * session_duration_min
-            * (60 / 8)
-            * self.rng.uniform(0.5, 1.0, n)
+            throughput_mbps * session_duration_min * (60 / 8) * self.rng.uniform(0.5, 1.0, n)
         )
 
         # --- target: MOS score ---
         mos_score = self.compute_qoe_mos(
-            throughput_mbps, latency_ms, packet_loss_pct, app_type,
+            throughput_mbps,
+            latency_ms,
+            packet_loss_pct,
+            app_type,
         )
 
         df = pd.DataFrame(
@@ -180,9 +202,11 @@ class QoEDataGenerator(TelecomDataGenerator):
             }
         )
 
-        print(f"Generated {len(df):,} sessions  |  "
-              f"MOS mean={df['mos_score'].mean():.2f}  "
-              f"std={df['mos_score'].std():.2f}")
+        print(
+            f"Generated {len(df):,} sessions  |  "
+            f"MOS mean={df['mos_score'].mean():.2f}  "
+            f"std={df['mos_score'].std():.2f}"
+        )
         return df
 
 

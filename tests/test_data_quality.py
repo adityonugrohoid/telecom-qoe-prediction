@@ -18,7 +18,6 @@ def sample_data():
 
 
 class TestDataQuality:
-
     def test_no_missing_values(self, sample_data):
         critical_cols = ["session_id", "sinr_db", "throughput_mbps", "latency_ms", "mos_score"]
         for col in critical_cols:
@@ -43,7 +42,9 @@ class TestDataQuality:
     def test_categorical_values(self, sample_data):
         assert set(sample_data["network_type"].unique()).issubset({"4G", "5G"})
         assert set(sample_data["device_class"].unique()).issubset({"low", "mid", "high"})
-        assert set(sample_data["app_type"].unique()).issubset({"video_streaming", "browsing", "gaming", "social", "voip"})
+        assert set(sample_data["app_type"].unique()).issubset(
+            {"video_streaming", "browsing", "gaming", "social", "voip"}
+        )
 
     def test_sample_size(self, sample_data):
         assert len(sample_data) == 1000
@@ -55,7 +56,6 @@ class TestDataQuality:
 
 
 class TestDataGenerator:
-
     def test_generator_reproducibility(self):
         gen1 = QoEDataGenerator(seed=42, n_samples=100)
         gen2 = QoEDataGenerator(seed=42, n_samples=100)
