@@ -168,6 +168,7 @@ uv run jupyter nbconvert --to notebook --execute notebooks/04_qoe_prediction.ipy
 | RMSE | 0.45 | On held-out test set, MOS scale 1-5 |
 | R2 | 0.58 | Unobserved subjective factors cap ceiling |
 | Gaming RMSE | 0.47 | Highest per-segment error; latency sensitivity |
+| Baseline RMSE (mean MOS) | 0.69 | Measured in `evidence/baseline_metrics.json` via `uv run python -m qoe_prediction.baseline` |
 
 ### Top Predictors (SHAP)
 
