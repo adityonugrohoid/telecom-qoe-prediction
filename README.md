@@ -176,6 +176,18 @@ uv run jupyter nbconvert --to notebook --execute notebooks/04_qoe_prediction.ipy
 2. `throughput_mbps` - directly limits video and download quality
 3. `latency_ms` - critical for gaming and VoIP; drives gaming segment's elevated RMSE
 
+### Figures
+
+![Predicted vs actual MOS and residual plot](docs/figures/predicted-vs-actual-mos.png)
+
+Predicted vs actual MOS on the held-out test set, with the residual plot alongside it.
+
+![SHAP summary plot](docs/figures/shap-summary.png)
+
+SHAP summary plot showing per-feature impact on the MOS prediction, ranked by mean absolute SHAP value.
+
+Both figures are exported from the executed notebook by `scripts/export_notebook_figures.py`.
+
 ## Data Engineering
 
 | Attribute | Value |
